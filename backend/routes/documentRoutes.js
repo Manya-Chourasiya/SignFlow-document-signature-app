@@ -1,17 +1,19 @@
 const express = require("express");
 const multer = require("multer");
 const path = require("path");
-
-console.log(
-  "DOCUMENT PATH:",
-  require.resolve("../models/Document")
-);
+const fs = require("fs");
+const { PDFDocument, rgb } = require("pdf-lib");
 
 const Document = require("../models/Document");
-
-console.log("DOCUMENT MODEL:", Document);
+const Signature = require("../models/Signature");
 
 const router = express.Router();
+
+/*
+=================================
+Multer Configuration
+=================================
+*/
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -25,32 +27,47 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-router.post("/upload", upload.single("pdf"), async (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).send("No file uploaded");
+/*
+=================================
+Upload PDF
+=================================
+*/
+
+router.post(
+  "/upload",
+  upload.single("pdf"),
+  async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).send("No file uploaded");
+      }
+
+      const document = new Document({
+        fileName: req.file.filename,
+        filePath: req.file.path,
+      });
+
+      await document.save();
+
+      res.status(201).json({
+        message: "PDF Uploaded Successfully",
+        document,
+      });
+    } catch (error) {
+      console.error(error);
+
+      res.status(500).json({
+        error: error.message,
+      });
     }
-
-    const document = new Document({
-      fileName: req.file.filename,
-      filePath: req.file.path,
-    });
-
-    await document.save();
-
-    res.status(201).json({
-      message: "PDF Uploaded Successfully",
-      document,
-    });
-  } catch (error) {
-    console.log("ERROR:", error);
-    console.log("MESSAGE:", error.message);
-
-    res.status(500).json({
-      error: error.message,
-    });
   }
-});
+);
+
+/*
+=================================
+Get All Documents
+=================================
+*/
 
 router.get("/", async (req, res) => {
   try {
@@ -65,5 +82,84 @@ router.get("/", async (req, res) => {
     });
   }
 });
+
+/*
+=================================
+Download Signed PDF
+=================================
+*/
+
+router.get(
+  "/download-signed/:documentId",
+  async (req, res) => {
+    try {
+      const document = await Document.findById(
+        req.params.documentId
+      );
+
+      if (!document) {
+        return res.status(404).json({
+          message: "Document not found",
+        });
+      }
+
+      const signatures =
+        await Signature.find({
+          documentId: document._id,
+        });
+
+      const pdfPath = path.join(
+        __dirname,
+        "..",
+        document.filePath
+      );
+
+      const existingPdfBytes =
+        fs.readFileSync(pdfPath);
+
+      const pdfDoc =
+        await PDFDocument.load(
+          existingPdfBytes
+        );
+
+      const pages = pdfDoc.getPages();
+
+      const firstPage = pages[0];
+
+      signatures.forEach((sig) => {
+        firstPage.drawText(sig.signer, {
+          x: sig.x,
+          y:
+            firstPage.getHeight() -
+            sig.y,
+          size: 18,
+          color: rgb(1, 0, 0),
+        });
+      });
+
+      const pdfBytes =
+        await pdfDoc.save();
+
+      res.setHeader(
+        "Content-Type",
+        "application/pdf"
+      );
+
+      res.setHeader(
+        "Content-Disposition",
+        "attachment; filename=signed-document.pdf"
+      );
+
+      res.send(Buffer.from(pdfBytes));
+    } catch (error) {
+      console.error(error);
+
+      res.status(500).json({
+        message:
+          "Failed to generate signed PDF",
+      });
+    }
+  }
+);
 
 module.exports = router;
