@@ -1,8 +1,13 @@
 const express = require("express");
+const cors = require("cors");
 const connectDB = require("./db");
 const authRoutes = require("./routes/authRoutes");
+const documentRoutes = require("./routes/documentRoutes");
+const signatureRoutes = require("./routes/signatureRoutes");
+const path = require("path");
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 
 // Connect MongoDB
@@ -10,6 +15,9 @@ connectDB();
 
 // Auth Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/docs", documentRoutes);
+app.use("/api/signatures", signatureRoutes);
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Home Route
 app.get("/", (req, res) => {
