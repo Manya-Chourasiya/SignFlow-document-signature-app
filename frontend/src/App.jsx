@@ -5,6 +5,7 @@ function App() {
   const [signatures, setSignatures] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);
   const [selectedDoc, setSelectedDoc] = useState(null);
+  const [signatureMode, setSignatureMode] = useState(false);
 
   const fetchDocuments = async () => {
     try {
@@ -12,7 +13,7 @@ function App() {
       const data = await response.json();
       setDocuments(data);
     } catch (error) {
-      console.error("Error fetching documents:", error);
+      console.error(error);
     }
   };
 
@@ -22,13 +23,13 @@ function App() {
       const data = await response.json();
       setSignatures(data);
     } catch (error) {
-      console.error("Error fetching signatures:", error);
+      console.error(error);
     }
   };
 
   const handleUpload = async () => {
     if (!selectedFile) {
-      alert("Please select a PDF file");
+      alert("Please select a PDF");
       return;
     }
 
@@ -44,18 +45,52 @@ function App() {
         }
       );
 
-      const data = await response.json();
-
-      console.log("Upload Response:", data);
+      await response.json();
 
       alert("PDF Uploaded Successfully");
 
-      setSelectedFile(null);
-
       fetchDocuments();
+
+      setSelectedFile(null);
     } catch (error) {
-      console.error("Upload Error:", error);
-      alert("Upload Failed");
+      console.error(error);
+    }
+  };
+
+  const handleSignaturePlacement = async (e) => {
+    if (!signatureMode || !selectedDoc) return;
+
+    const rect = e.currentTarget.getBoundingClientRect();
+
+    const x = Math.round(e.clientX - rect.left);
+    const y = Math.round(e.clientY - rect.top);
+
+    try {
+      const response = await fetch(
+        "http://localhost:5000/api/signatures",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            documentId: selectedDoc._id,
+            x,
+            y,
+            signer: "manya@gmail.com",
+          }),
+        }
+      );
+
+      await response.json();
+
+      alert(`Signature Saved at (${x}, ${y})`);
+
+      setSignatureMode(false);
+
+      fetchSignatures();
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -70,41 +105,36 @@ function App() {
         Document Signature App
       </h1>
 
-      {/* Upload Section */}
+      {/* Upload */}
       <div className="bg-white p-6 rounded-xl shadow mb-6">
         <h2 className="text-2xl font-semibold mb-4">
           Upload PDF
         </h2>
 
-        <div className="flex flex-col gap-4">
+        <div className="flex gap-4">
           <input
             type="file"
             accept=".pdf"
-            onChange={(e) => {
-              const file = e.target.files[0];
-
-              if (file) {
-                setSelectedFile(file);
-              }
-            }}
+            onChange={(e) =>
+              setSelectedFile(e.target.files[0])
+            }
           />
-
-          <div className="p-2 border rounded">
-            <strong>Selected File:</strong>{" "}
-            {selectedFile ? selectedFile.name : "None"}
-          </div>
 
           <button
             onClick={handleUpload}
-            className="bg-blue-600 text-white px-4 py-2 rounded w-fit hover:bg-blue-700"
+            className="bg-blue-600 text-white px-4 py-2 rounded"
           >
-            Upload PDF
+            Upload
           </button>
         </div>
+
+        <p className="mt-2">
+          Selected File:{" "}
+          {selectedFile ? selectedFile.name : "None"}
+        </p>
       </div>
 
-      {/* Main Layout */}
-      <div className="grid grid-cols-3 gap-6 mb-6">
+      <div className="grid grid-cols-3 gap-6">
 
         {/* Documents */}
         <div className="bg-white p-4 rounded-xl shadow">
@@ -112,83 +142,83 @@ function App() {
             Documents
           </h2>
 
-          {documents.length === 0 ? (
-            <p>No documents found</p>
-          ) : (
-            documents.map((doc) => (
-              <div
-                key={doc._id}
-                onClick={() => setSelectedDoc(doc)}
-                className="border p-3 rounded-lg mb-3 cursor-pointer hover:bg-gray-100"
-              >
-                <p>{doc.fileName}</p>
-              </div>
-            ))
-          )}
+          {documents.map((doc) => (
+            <div
+              key={doc._id}
+              onClick={() => setSelectedDoc(doc)}
+              className="border p-3 rounded-lg mb-3 cursor-pointer hover:bg-gray-100"
+            >
+              {doc.fileName}
+            </div>
+          ))}
         </div>
 
-        {/* PDF Preview */}
+        {/* PDF */}
         <div className="col-span-2 bg-white p-4 rounded-xl shadow">
-          <h2 className="text-2xl font-semibold mb-4">
-            PDF Preview
-          </h2>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-semibold">
+              PDF Preview
+            </h2>
+
+            <button
+              onClick={() =>
+                setSignatureMode(!signatureMode)
+              }
+              className="bg-green-600 text-white px-4 py-2 rounded"
+            >
+              {signatureMode
+                ? "Cancel"
+                : "Add Signature"}
+            </button>
+          </div>
 
           {!selectedDoc ? (
-            <p>Select a document to preview</p>
+            <p>Select a document</p>
           ) : (
-            <iframe
-              title="PDF Viewer"
-              src={`http://localhost:5000/uploads/${selectedDoc.fileName}`}
-              width="100%"
-              height="800px"
-              className="border rounded"
-            />
+            <>
+              <iframe
+                title="PDF Viewer"
+                src={`http://localhost:5000/uploads/${selectedDoc.fileName}`}
+                width="100%"
+                height="600px"
+                className="border rounded"
+              />
+
+              <div
+                className={`mt-4 h-48 border-4 rounded flex items-center justify-center ${
+                  signatureMode
+                    ? "border-green-500 bg-green-50"
+                    : "border-gray-300"
+                }`}
+                onClick={handleSignaturePlacement}
+              >
+                {signatureMode
+                  ? "Click Here To Place Signature"
+                  : "Signature Placement Area"}
+              </div>
+            </>
           )}
         </div>
       </div>
 
       {/* Signatures */}
-      <div className="bg-white p-6 rounded-xl shadow">
+      <div className="bg-white p-6 rounded-xl shadow mt-6">
         <h2 className="text-2xl font-semibold mb-4">
           Saved Signatures
         </h2>
 
-        {signatures.length === 0 ? (
-          <p>No signatures found</p>
-        ) : (
-          <div className="space-y-3">
-            {signatures.map((sig) => (
-              <div
-                key={sig._id}
-                className="border p-3 rounded-lg"
-              >
-                <p>
-                  <strong>Signer:</strong> {sig.signer}
-                </p>
-
-                <p>
-                  <strong>Document ID:</strong> {sig.documentId}
-                </p>
-
-                <p>
-                  <strong>X:</strong> {sig.x}
-                </p>
-
-                <p>
-                  <strong>Y:</strong> {sig.y}
-                </p>
-
-                <p>
-                  <strong>Page:</strong> {sig.page}
-                </p>
-
-                <p>
-                  <strong>Status:</strong> {sig.status}
-                </p>
-              </div>
-            ))}
+        {signatures.map((sig) => (
+          <div
+            key={sig._id}
+            className="border p-3 rounded mb-3"
+          >
+            <p>Document: {sig.documentId}</p>
+            <p>X: {sig.x}</p>
+            <p>Y: {sig.y}</p>
+            <p>Signer: {sig.signer}</p>
+            <p>Status: {sig.status}</p>
           </div>
-        )}
+        ))}
       </div>
     </div>
   );
