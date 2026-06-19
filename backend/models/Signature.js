@@ -23,9 +23,28 @@ const signatureSchema = new mongoose.Schema(
       default: 1,
     },
 
+    // Size of the PDF preview (in CSS pixels) on the frontend at the exact
+    // moment this signature was placed. Required to correctly scale x/y
+    // into PDF point space when generating the signed PDF — without these,
+    // the signature position cannot be trusted (see documentRoutes.js).
+    pageWidth: {
+      type: Number,
+      required: true,
+    },
+
+    pageHeight: {
+      type: Number,
+      required: true,
+    },
+
     signer: {
       type: String,
       required: true,
+    },
+
+    signerName: {
+      type: String,
+      default: "",
     },
 
     signatureImage: {

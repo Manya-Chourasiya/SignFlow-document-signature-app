@@ -45,6 +45,28 @@ router.post("/create", async (req, res) => {
 
 /*
 =================================
+Get All Signing Links
+=================================
+*/
+
+router.get("/", async (req, res) => {
+  try {
+    const links = await SigningLink.find()
+      .populate("documentId")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json(links);
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+});
+
+/*
+=================================
 Get Signing Link By Token
 =================================
 */
