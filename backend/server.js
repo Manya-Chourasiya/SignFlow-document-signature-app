@@ -4,6 +4,7 @@ const connectDB = require("./db");
 const authRoutes = require("./routes/authRoutes");
 const documentRoutes = require("./routes/documentRoutes");
 const signatureRoutes = require("./routes/signatureRoutes");
+const auditRoutes = require("./routes/auditRoutes");
 const path = require("path");
 
 const app = express();
@@ -18,6 +19,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/docs", documentRoutes);
 app.use("/api/signatures", signatureRoutes);
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/api/audit", auditRoutes);
 
 // Home Route
 app.get("/", (req, res) => {

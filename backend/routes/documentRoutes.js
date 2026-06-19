@@ -6,6 +6,7 @@ const { PDFDocument, rgb } = require("pdf-lib");
 
 const Document = require("../models/Document");
 const Signature = require("../models/Signature");
+const AuditLog = require("../models/AuditLog");
 
 const router = express.Router();
 
@@ -48,6 +49,12 @@ router.post(
       });
 
       await document.save();
+      await AuditLog.create({
+       documentId: document._id,
+       action: "PDF Uploaded",
+       user: "manya@gmail.com",
+       ipAddress: req.ip,
+      });
 
       res.status(201).json({
         message: "PDF Uploaded Successfully",

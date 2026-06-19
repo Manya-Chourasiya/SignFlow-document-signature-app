@@ -2,6 +2,7 @@ const express = require("express");
 const multer = require("multer");
 const path = require("path");
 const Signature = require("../models/Signature");
+const AuditLog = require("../models/AuditLog");
 
 const router = express.Router();
 
@@ -63,6 +64,13 @@ router.post("/", async (req, res) => {
       req.body
     );
 
+    await AuditLog.create({
+     documentId: signature.documentId,
+     action: "Signature Added",
+     user: signature.signer,
+     ipAddress: req.ip,
+    });
+
     console.log("SAVED:", signature);
 
     res.status(201).json({
@@ -112,5 +120,48 @@ router.get("/:documentId", async (req, res) => {
     });
   }
 });
+router.patch(
+  "/:signatureId/status",
+  async (req, res) => {
+    try {
+      const { status, rejectionReason } =
+        req.body;
+
+      const signature =
+        await Signature.findByIdAndUpdate(
+          req.params.signatureId,
+          {
+            status,
+            rejectionReason:
+              rejectionReason || "",
+          },
+          {
+            new: true,
+          }
+        );
+
+      if (!signature) {
+        return res.status(404).json({
+          message: "Signature not found",
+        });
+      }
+
+      await AuditLog.create({
+        documentId: signature.documentId,
+        action: `Status changed to ${status}`,
+        user: signature.signer,
+        ipAddress: req.ip,
+      });
+
+      res.status(200).json(signature);
+    } catch (error) {
+      console.error(error);
+
+      res.status(500).json({
+        message: error.message,
+      });
+    }
+  }
+);
 
 module.exports = router;
