@@ -1,10 +1,24 @@
 # SignFlow – Digital Document Signature Platform
 
+> Developed as part of a Full Stack Web Development Internship at **Labmentix**.
+
+## Live Deployment
+
+### Frontend (Vercel)
+
+https://sign-flow-document-signature-app.vercel.app
+
+### Backend (Render)
+
+https://signflow-document-signature-app-leli.onrender.com
+
+---
+
 ## Overview
 
 SignFlow is a full-stack digital signature platform that enables users to upload PDF documents, place signatures, generate public signing links, and securely download signed PDFs.
 
-The platform streamlines the document signing process by allowing both internal users and external signers to collaborate through secure, token-based signing links.
+The platform streamlines document signing workflows by allowing both internal users and external signers to collaborate through secure token-based signing links.
 
 ---
 
@@ -28,7 +42,7 @@ The platform streamlines the document signing process by allowing both internal 
 * Upload Signature Images
 * Place Signatures on PDFs
 * Delete Incorrectly Placed Signatures
-* Store Signature Coordinates
+* Coordinate-Based Signature Placement
 
 ### Public Signing Portal
 
@@ -41,7 +55,7 @@ The platform streamlines the document signing process by allowing both internal 
 
 * Generate Signed PDFs
 * Download Signed PDFs
-* Coordinate-Based Signature Placement
+* Dynamic Signature Placement
 
 ### Activity Tracking
 
@@ -89,11 +103,11 @@ The platform streamlines the document signing process by allowing both internal 
 ## System Workflow
 
 1. User uploads a PDF document.
-2. User places signatures on the document.
-3. User generates a public signing link.
-4. External signer opens the link.
-5. Signer uploads a signature image.
-6. Signer signs the document.
+2. User uploads a signature image.
+3. User places the signature on the document.
+4. User generates a secure public signing link.
+5. External signer accesses the link.
+6. Signer uploads a signature image and signs the document.
 7. System generates a signed PDF.
 8. Signed document can be viewed and downloaded.
 
@@ -101,19 +115,21 @@ The platform streamlines the document signing process by allowing both internal 
 
 ## Project Structure
 
-frontend/
+### Frontend
 
 * React
 * Tailwind CSS
 * React Router
 * React PDF
 
-backend/
+### Backend
 
 * Express.js
-* MongoDB
+* MongoDB Atlas
 * JWT Authentication
 * PDF Processing APIs
+* Audit Logging
+* Public Signing Link APIs
 
 ---
 
@@ -122,7 +138,7 @@ backend/
 ### Clone Repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/SignFlow-document-signature-app.git
+git clone https://github.com/Manya-Chourasiya/SignFlow-document-signature-app.git
 cd SignFlow-document-signature-app
 ```
 
@@ -131,7 +147,7 @@ cd SignFlow-document-signature-app
 ```bash
 cd backend
 npm install
-npm run dev
+npm start
 ```
 
 ### Frontend Setup
@@ -146,13 +162,32 @@ npm run dev
 
 ## Environment Variables
 
-Create a `.env` file in the backend directory:
+Create a `.env` file inside the backend directory:
 
 ```env
-PORT=5000
 MONGO_URI=your_mongodb_connection_string
 JWT_SECRET=your_secret_key
 ```
+
+---
+
+## Screenshots
+
+### Dashboard
+
+(Add Dashboard Screenshot)
+
+### Documents
+
+(Add Documents Page Screenshot)
+
+### Public Signing Page
+
+(Add Public Signing Page Screenshot)
+
+### Audit Logs
+
+(Add Audit Logs Screenshot)
 
 ---
 
@@ -161,16 +196,32 @@ JWT_SECRET=your_secret_key
 * Email-Based Signing Invitations
 * Multi-Signer Workflows
 * Role-Based Access Control
-* Link Expiration Management
 * Multi-Page Signature Placement
-* Cloud Storage Integration
+* Cloud Storage Integration (AWS S3 / Cloudinary)
+* Advanced Audit Analytics
+
+---
+
+## Internship Project
+
+This project was developed as part of a **Full Stack Web Development Internship at Labmentix**.
+
+The project demonstrates practical implementation of:
+
+* Full Stack Web Development
+* REST API Design
+* JWT Authentication
+* MongoDB Database Integration
+* PDF Processing and Manipulation
+* File Upload Management
+* Secure Digital Signature Workflows
 
 ---
 
 ## Author
 
-Manya Chourasiya
+**Manya Chourasiya**
 
 B.Tech Computer Science Engineering
 
-SignFlow was developed as a secure digital document signing solution demonstrating full-stack development, authentication, PDF processing, and secure document workflows.This project was developed as part of a Web Development Internship at Labmentix.
+Developed during the Full Stack Web Development Internship at **Labmentix**.
