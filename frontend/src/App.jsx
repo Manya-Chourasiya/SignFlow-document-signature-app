@@ -55,6 +55,8 @@ function App() {
       console.error(error);
     }
   };
+  setSignatures(Array.isArray(data) ? data : []);
+  setPublicLinks(Array.isArray(data) ? data : []);
 
   const fetchSignatures = async () => {
     try {
@@ -65,6 +67,8 @@ function App() {
       console.error(error);
     }
   };
+  setSignatures(Array.isArray(data) ? data : []);
+  setPublicLinks(Array.isArray(data) ? data : []);
 
   const fetchPublicLinks = async () => {
     try {
@@ -75,6 +79,8 @@ function App() {
       console.error(error);
     }
   };
+  setSignatures(Array.isArray(data) ? data : []);
+  setPublicLinks(Array.isArray(data) ? data : []);
 
   const generateAuditLogs = () => {
     const logs = [];
