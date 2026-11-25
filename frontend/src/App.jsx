@@ -50,37 +50,31 @@ function App() {
     try {
       const response = await fetch(`${API_BASE}/api/docs`);
       const data = await response.json();
-      setDocuments(data);
+      setDocuments(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error(error);
     }
   };
-  setSignatures(Array.isArray(data) ? data : []);
-  setPublicLinks(Array.isArray(data) ? data : []);
 
   const fetchSignatures = async () => {
     try {
       const response = await fetch(`${API_BASE}/api/signatures`);
       const data = await response.json();
-      setSignatures(data);
+      setSignatures(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error(error);
     }
   };
-  setSignatures(Array.isArray(data) ? data : []);
-  setPublicLinks(Array.isArray(data) ? data : []);
 
   const fetchPublicLinks = async () => {
     try {
       const response = await fetch(`${API_BASE}/api/sign-links`);
       const data = await response.json();
-      setPublicLinks(data);
+      setPublicLinks(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error(error);
     }
   };
-  setSignatures(Array.isArray(data) ? data : []);
-  setPublicLinks(Array.isArray(data) ? data : []);
 
   const generateAuditLogs = () => {
     const logs = [];
@@ -545,7 +539,10 @@ function App() {
                         </Document>
 
                         {signatures
-                          .filter((sig) => sig.documentId === selectedDoc._id)
+                          .filter(
+                            (sig) =>
+                              (sig.documentId?._id || sig.documentId) === selectedDoc._id
+                          )
                           .map((sig) => (
                             <div
                               key={sig._id}
